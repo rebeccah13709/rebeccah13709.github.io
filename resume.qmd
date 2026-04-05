@@ -1,91 +1,79 @@
 ---
 layout: cv
-title: Isaac Newtons's CV
+title: Rebecca Hockman's CV
 ---
-# Isaac Newton
-Physicist, Mathematician, Cambridge professor.
+# Rebecca Hockman
+Business analytics major with a proven track record of driving operational efficiency and performance improvement in customer service and internal solutions environments. Currently serving as CC solutions Team team lead, known for leveraging data-driven strategies to enhance team productivity, develop training protocols, and support cross-functional collaboration
 
 <div id="webaddress">
-<a href="isaac@applesdofall.org">isaac@applesdofall.org</a>
-| <a href="http://en.wikipedia.org/wiki/Isaac_Newton">My wikipedia page</a>
+<a href="www.linkedin.com/in/rebeccahockman">Linkedin</a>
+| <a href="rhockman@melaleuca.com">Email</a>
 <!-- | <a href="https://yourusername.github.io/datascience_portfolio/gh-pages/resume.pdf">Download PDF</a> -->
 | <a href="https://github.com/byuidatascience/datascience_portfolio/blob/gh-pages/resume.pdf">Download PDF</a>
 </div>
 
 
-## Currently
+## Experience
 
-Standing on the shoulders of giants
+### CC Solutions Team Lead
+January 2024 - Present
+Rexburg, Idaho
 
-### Specialized in
+Delivered rapid and effective internal solutions for customer service inquiries, consistently maintaining a scorecard rating of 80+ across all performance categories
+Recognized as star performer and top of Team scorecard for July 2025
+Averaged 16 tasks per hour over last 4 months versus the goal of 12, demonstrating sustained productivity and time management in a high volume environment
+Trained 2 new employees while providing ongoing coaching and feedback to whole team to elevate service standards
+Authored and refined Standard Operating Procedures and created a task tracker on excel to give feedback on efficiency in real time
+Acquired focused understanding of the compensation plan, policies, and connection with Marketing executives, tested and passed panel with Business Development on 8/21/2025
 
-Laws of motion, gravitation, minting coins, disliking [Robert Hooke](http://en.wikipedia.org/wiki/Robert_Hooke)
+### Customer Service Team Lead
+July 2024 - January 2025
+Rexburg, Idaho
+
+Delivered prompt, tailored solutions to customer inquiries, optimizing satisfaction, and growing members globally to maintain and improve on the company wide 97% retention rate
+Achieved top performer on new employee scorecard, reflecting excellence in service quality, responsiveness and adherence to Key Performance indicators
+Utilized resources such as the customer improvement message board and policy updates to tailor communication to each customer and recognize solutions to trends
+Sustained a minimum of 18 marketing service transfers per month
+
+### 1st Assistant General Manager
+January 2020 - February 2024
+Glendale, Arizona
+
+Communicated with customers to manage and respond to negative customer reviews, implementing feedback and maintaining a 100% customer satisfaction score
+Reduced weekday labor costs from 15% to a consistent 8%, leveraging real-time scheduling adjustments and task-based labor modeling to optimize workforce efficiency
+Conducted structured interviews and performance evaluations to identify high-potential employees for promotion and wage increases, aligning development with operational goals
+Led training and development for new hires and prospective management candidates, including full onboarding and performance coaching for the January 2024 management team
 
 
-### Research interests
+## Skills
 
-Cooling, power series, optics, alchemy, planetary motions, apples.
+- Intermediate SQL for managing large databases and Information
+- Advanced excel for spreadsheet analysis including VBA
+- Creative problem solving capabilities
+- R Studio for analytics using QMD to HTML
+- Organization and Communication in and out of the workplace
+- Efficiency in both Independant and Cooperative work
+- VS Code Programming in Python and QMD to HTML and Github
+- 66 Words Per minute Typing Speed 
 
 
 ## Education
 
-`1654-1660`
-__The King's School, Grantham.__
-
-`June 1661 - now`
-__Trinity College, Cambridge__
-
-- Sizar
+`September 2020 - December 2026 (Anticipated)`
+__Brigham Young University Idaho__
 
 `1667 - death`
 __Trinity College, Cambridge__
 
-- Fellow
 
+## Applied Coursework
 
-
-## Awards
-
-`2012`
-President, *Royal Society*, London, UK
-
-Associate, *French Academy of Science*, Paris, France
-
-
-
-## Publications
-
-<!-- A list is also available [online](http://scholar.google.co.uk/citations?user=LTOTl0YAAAAJ) -->
-
-### Journals
-
-`1669`
-Newton Sir I, De analysi per æquationes numero terminorum infinitas. 
-
-`1669`
-Lectiones opticæ.
-
-etc. etc. etc.
-
-### Patents
-
-`2012`
-Infinitesimal calculus for solutions to physics problems, [SMBC](http://www.techdirt.com/articles/20121011/09312820678/if-patents-had-been-around-time-newton.shtml) patent 001
-
-
-## Occupation
-
-`1600`
-__Royal Mint__, London
-
-- Warden
-- Minted coins
-
-`1600`
-__Lucasian professor of Mathematics__, Cambridge University
-
-
+Designed and coded a relational SQL database with over 600 data entries, writing complex queries to extract, filter, and analyze information across multiple use cases
+Performed complex analytical studies and managed large, complex datasets using Quarto, Python and SQL
+Developed professional excel rep orts for quick and automated referencing and analysis of business reports
+Completed financial and managerial accounting coursework, applying core principles to analyze financial data, develop budgets, and support business decision-making in practical assignments
+Interpreted and created financial statements including balance sheets and income reports, applying accounting principles to assess business performance and guide decision making
 
 <!-- ### Footer
 
-Last updated: May 2013 -->
+Last updated: April 2026 -->

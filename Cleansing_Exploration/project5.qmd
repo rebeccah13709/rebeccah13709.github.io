@@ -1,7 +1,7 @@
 ---
-title: "Client Report - [Insert Project Title]"
-subtitle: "Course DS 250"
-author: "[STUDENT NAME]"
+title: "Client Report - Missing values"
+subtitle: "Unit 2 Task 3"
+author: "Rebecca Hockman"
 format:
   html:
     self-contained: true
@@ -25,4 +25,242 @@ execute:
     
 ---
 
-### Paste in a template
+```{python}
+import polars as pl
+import requests #new for reading in JSON
+import io       #new for reading in JSON
+import numpy as np
+from lets_plot import *
+
+LetsPlot.setup_html(isolated_frame=True)
+```
+
+
+```{python}
+url = "https://raw.githubusercontent.com/byuidatascience/data4missing/master/data-raw/flights_missing/flights_missing.json"
+response = requests.get(url)
+df = pl.read_json(io.BytesIO(response.content))
+```
+
+## QUESTION 1
+
+1. __Convert values to missing__ Start with a fresh copy of the flights dataset by reading it in from the link provided above (as opposed to starting with the dataset you ended with in the last assignment). Identify data values that are problematic, non-sense or impossible and change them to be missing. In your report include one record example (one row) from your clean data, in the raw JSON format. Your example should display at least one missing value so that we can verify it was done correctly. (Note: JSON will convert NaN's to null). Describe your process for finding values that needed to be changed, and how you changed them.
+
+To find the missing or imporrible values, I went to the data set, In the numerical columns I checked the minimum. For all of the items with a minimum of -999, I used a .replace to change then to Null. In the non numerical data, I did not find an issue where the missing data was not already registering as Null. I also changed 1500+ into just 1500 so that I could have all of the num of columns as i64
+
+```{python}
+# Include and execute your code here
+new_df = df.with_columns(
+  pl.col('month').replace("n/a", None),
+  pl.col('num_of_delays_late_aircraft').replace(-999, None),
+  pl.col('minutes_delayed_nas').replace(-999, None),
+  pl.col('num_of_delays_carrier').replace("1500+", "1500")
+)
+df = new_df.with_columns(
+    pl.col("num_of_delays_carrier").cast(pl.Int64)
+)
+
+
+import json
+
+edited = df[2].to_dicts()
+print(json.dumps(edited, indent=2))
+
+```
+
+## QUESTION 2
+
+2. __Filling in missing data__ For all the "minutes_delayed" columns, fill in any missing values with the median of that column. For the "num_of" columns, fill in missing values with that column's mean.
+
+_Nothing to write/report for this question_
+
+```{python}
+# Include and execute your code here
+clean_df = df.with_columns([
+    pl.col("^minutes_delayed.*$")
+      .fill_null(pl.col("^minutes_delayed.*$").median()),
+    pl.col("^num_of.*$")
+      .fill_null(pl.col("^num_of.*$").mean())
+])
+
+clean_df
+
+
+```
+
+## QUESTION 3
+ 
+3. __Display a histogram for num_of_delays_carrier and for minutes_delayed_nas (2 separate histograms in total). Comment on the shape of each one. Also report the mean of each of these columns now that missing values have been filled in.__
+
+The mean of the delays is 755.19
+You can see by the histogram that many of the counts of delays are less than 500, the high mean is likely because of the outliers of 1500.
+The mean of the number of minutes for delays is 69682.66
+You can see by the Number of minutes histogram that the count of the length of the delays is left skewed, making the mean under 100,000 even though there are higher outliers.
+
+```{python}
+# Include and execute your code here
+mean_stats = clean_df.select(
+    pl.col("num_of_delays_carrier").mean().alias("mean_num_of_delays_carrier"),
+    pl.col("minutes_delayed_nas").mean().alias("mean_minutes_delayed_nas")
+)
+
+
+
+carrier_vals = clean_df["num_of_delays_carrier"].to_list()
+
+num_delays = (
+    ggplot({"num_of_delays_carrier": carrier_vals}) +
+    geom_histogram(
+        aes(x="num_of_delays_carrier"),
+        bins=30,
+        fill="steelblue",
+        color="black"
+    ) +
+    labs(
+        title="Number of Carrier Delays",
+        x="Number of Delays",
+        y=" "
+    )
+)
+
+
+
+nas_vals = clean_df["minutes_delayed_nas"].to_list()
+
+mins_delayed = (
+    ggplot({"minutes_delayed_nas": nas_vals}) +
+    geom_histogram(
+        aes(x="minutes_delayed_nas"),
+        bins=30,
+        fill="darkorange",
+        color="black"
+    ) +
+    labs(
+        title="Number of Minutes Delayed",
+        x="Minutes Delayed",
+        y=" "
+    )
+)
+
+num_delays
+
+
+
+
+
+```
+
+
+```{python}
+mins_delayed
+```
+
+----stretch-----
+
+
+Which delay is the worst delay? Keep working with the cleaned dataset you created in the previous task. Compare the proportion of flights delayed due to Carrier, to Security, and to Late Aircraft. Show this comparison in a Chart and a Table. Describe your results.
+
+I can see from this bar graph that the delay type that effects aiports the most is from aircrafts that get delayed for any reason. Also shown by the graph that Security delays are very few.
+
+```{python}
+delay_summary = clean_df.select(
+    pl.col("num_of_delays_carrier").sum().alias("Carrier"),
+    pl.col("num_of_delays_late_aircraft").sum().alias("Late Aircraft"),
+    pl.col("num_of_delays_security").sum().alias("Security")
+)
+delay_long = (
+    delay_summary
+    .unpivot(
+        variable_name="Delay_Type",
+        value_name="Total_Delays"
+    )
+)
+total_delays = delay_long["Total_Delays"].sum()
+
+delay_long = delay_long.with_columns(
+    (pl.col("Total_Delays") / total_delays).alias("Proportion")
+)
+
+plot_data = delay_long.to_dict(as_series=False)
+
+delay_plot = (
+    ggplot(plot_data) 
+    + geom_bar(
+        aes(x="Delay_Type", y="Proportion"),
+        stat="identity"
+    ) 
+    + labs(
+        title="Flight Delays by Type",
+        x="Delay Type",
+        y="Proportion from Total Delays"
+    )
+)
+delay_long
+
+
+```
+
+
+```{python}
+delay_plot
+```
+
+Create another chart that shows the proportion of delays for each reason (Carrier, Security, and Late Aircraft) across all 7 airports. Describe your results.
+
+This shows that ORD has the highest amounts of delays by late aircrafts, while this airport also has the lowest amount of Carrier delays. Though we learned previously in the analysis that ORD has the highest percentage of delays to flights.
+
+
+```{python}
+
+airports = (
+    clean_df
+    .group_by("airport_code")
+    .agg([
+        pl.col("num_of_delays_carrier").sum().alias("Carrier"),
+        pl.col("num_of_delays_late_aircraft").sum().alias("Late Aircraft"),
+        pl.col("num_of_delays_security").sum().alias("Security")
+    ])
+)
+
+airport_long = (
+    airports
+    .unpivot(
+        index="airport_code",
+        variable_name="Delay_Type",
+        value_name="Total_Delays"
+    )
+)
+
+airport_props = (
+    airport_long
+    .with_columns(
+        (pl.col("Total_Delays") /
+         pl.col("Total_Delays").sum().over("airport_code")
+        ).alias("Proportion")
+    )
+)
+
+airport_props
+```
+
+
+```{python}
+plot_data = airport_props.to_dict(as_series=False)
+
+airport_plot = (
+    ggplot(plot_data) +
+    geom_bar(
+        aes(x="airport_code", y="Proportion", fill="Delay_Type"),
+        stat="identity",
+        position="dodge"
+    ) +
+    labs(
+        title="Proportion of Delay Types Across Airports",
+        x="Airport",
+        y="Proportion of Total Delays"
+    )
+)
+
+airport_plot
+
+```

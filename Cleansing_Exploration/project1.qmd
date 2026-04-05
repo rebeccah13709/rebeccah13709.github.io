@@ -1,7 +1,7 @@
 ---
-title: "Client Report - [Insert Project Title]"
-subtitle: "Course DS 250"
-author: "[STUDENT NAME]"
+title: "Client Report - Famous Names"
+subtitle: "Stretch Assignment - Elliot"
+author: "Rebecca Hockman"
 format:
   html:
     self-contained: true
@@ -22,7 +22,55 @@ format:
         caption: See code
 execute: 
   warning: false
-    
 ---
+```{python}
+import polars as pl
+import numpy as np
+from lets_plot import *
 
-### Paste in a template
+LetsPlot.setup_html(isolated_frame=True)
+```
+
+```{python}
+# Learn morea about Code Cells: https://quarto.org/docs/reference/cells/cells-jupyter.html
+
+# Include and execute your code here
+df = pl.read_csv("https://posit.byui.edu/content/0d43d66f-d3b7-4c43-8c36-52e3ed69e7f1/names_year_csv.csv")
+```
+
+Reproduce the chart Elliot using the data from the names_year.csv file. If, after a couple of hours, you can get the chart close, but not exactly the same, that is okay. You will learn more to the degree you push yourself.
+
+```{python}
+
+
+Elliot_df = (df.filter(pl.col("name") == "Elliot"))
+ 
+
+plot = (
+    ggplot(data=Elliot_df)
+    + geom_line(aes(x='year', y='Total', color="name"), size=1)
+    + geom_vline(xintercept=2002, linetype="dotted", color="red")
+    + geom_vline(xintercept=1985, linetype="dotted", color="red")
+    + geom_vline(xintercept=1982, linetype="dotted", color="red")
+    + ggtitle(f"Elliot... what?")
+    + xlab("Year")
+    +ylab(" ")
+    +scale_x_continuous(format="d")
+    +scale_y_continuous(format="d")
+    +scale_color_continuous(
+        value = "blue"
+    )
+    +geom_text(x=1970, y=3000, label="E.T. Released", size=5)
+    +geom_text(x=1988, y=3000, label="Second Release", size=5)
+    +geom_text(x=2004, y=3000, label="Third Release", size=5)
+    +scale_x_continuous(limits = [1950, 2025])
+    + theme(
+        plot_title=element_text(hjust=0),         
+        plot_title_position="plot",                
+        panel_background=element_rect(fill="lightgrey"), 
+        panel_grid_major=element_line(color="white")
+)
+)
+
+plot
+```

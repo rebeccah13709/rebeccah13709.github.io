@@ -1,7 +1,7 @@
 ---
-title: "Client Report - [Insert Project Title]"
-subtitle: "Course DS 250"
-author: "[STUDENT NAME]"
+title: "Client Report - Joins"
+subtitle: "Unit 3 Task 3"
+author: "Rebecca Hockman"
 format:
   html:
     self-contained: true
@@ -25,4 +25,103 @@ execute:
     
 ---
 
-### Paste in a template
+```{python}
+import polars as pl
+import numpy as np
+import sqlite3
+from lets_plot import *
+
+LetsPlot.setup_html(isolated_frame=True)
+```
+
+
+```{python}
+# Learn morea about Code Cells: https://quarto.org/docs/reference/cells/cells-jupyter.html
+
+# Include and execute your code here
+sqlite_file = 'lahmansbaseballdb.sqlite'
+# this file must be in the same location as your .qmd or .py file
+con = sqlite3.connect(sqlite_file)
+```
+
+## QUESTION 1
+
+__Write an SQL query that pulls in the the salaries table and the collegeplaying table (and any other tables you might need) and store them in polars dataframes. In Python Polars, combine the dataframes to create a list of baseball players who attended BYU-Idaho. The new table should contain five columns: playerID, schoolID, salary, yearID and teamID associated with each salary.__
+
+This table shows the PlayerID, SchoolID, Salary, yearID, and team ID for the collegeplaying table and the salaries table for students who attended BYU-Idaho
+
+```{python}
+# Include and execute your code here
+
+q = """
+SELECT DISTINCT
+    s.playerID,
+    cp.schoolID,
+    s.salary,
+    s.yearID,
+    s.teamID
+FROM Salaries s
+JOIN CollegePlaying cp 
+    ON s.playerID = cp.playerID
+JOIN Schools sch 
+    ON cp.schoolID = sch.schoolID
+WHERE sch.name_full = 'Brigham Young University-Idaho'
+"""
+
+results = pl.read_database(q, con)
+
+print(results)
+
+```
+
+
+## QUESTION 2
+
+1. Pick any two baseball teams and compare them using a metric of your choice (average salary, home runs, number of wins, etc). Be creative! Write an SQL query to read in the table(s) you need, then use polars to manipulate the data. Finally, make a graph using Lets-Plot to visualize the comparison. What do you learn?
+
+The Chicago White Sox are my family's team, as my grandpa is from Chicago himself. My family currently resides in Arizona, home of the diamondbacks. 
+I decided to show the data of the number of Home runs from the start of the Arizona Diamondbacks, back in 1998.
+From this graph, I can see that while the Sox have declined in recent years, that their home run count is climbing back up from the low in 2015.
+The Diamondbacks have been relatively constant in their homerun counts, but also plummetted in 2014, and have been climbing again in recent years.
+
+```{python}
+# Include and execute your code here
+q = """
+SELECT 
+    yearID, 
+    name, 
+    teamID,
+    HR,
+    W
+FROM Teams
+WHERE (teamID = 'CHA' OR teamID = 'ARI')
+  AND yearID >= 1998
+ORDER BY yearID ASC
+"""
+
+df_teams = pl.read_database(q, con)
+
+df_teams = df_teams.with_columns(
+    (pl.col("W") / 162).alias("win_rate") 
+)
+
+p = (
+    ggplot(df_teams, aes(x='yearID', y='HR', color='name')) +
+    geom_line(size=1) +
+    geom_point(size=3) +
+    scale_color_manual(values=['#000000', '#A71930']) +
+    labs(
+        title="Home Run Trends: White Sox vs. Diamondbacks",
+        subtitle="Arizona vs Chicago, yearly from 1998",
+        x="Year",
+        y="Total Home Runs",
+        color="Team Name"
+    ) +
+    theme_minimal()
+)
+
+p.show()
+
+```
+
+

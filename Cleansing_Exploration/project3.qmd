@@ -1,7 +1,7 @@
----
-title: "Client Report - [Insert Project Title]"
-subtitle: "Course DS 250"
-author: "[STUDENT NAME]"
+    ---
+title: "Client Report - Famous Names"
+subtitle: "Unit 1 Task 3"
+author: "Rebecca Hockman"
 format:
   html:
     self-contained: true
@@ -25,4 +25,119 @@ execute:
     
 ---
 
-### Paste in a template
+```{python}
+import polars as pl
+import numpy as np
+from lets_plot import *
+
+LetsPlot.setup_html(isolated_frame=True)
+```
+
+```{python}
+# Learn morea about Code Cells: https://quarto.org/docs/reference/cells/cells-jupyter.html
+
+# Include and execute your code here
+df = pl.read_csv("https://posit.byui.edu/content/0d43d66f-d3b7-4c43-8c36-52e3ed69e7f1/names_year_csv.csv")
+```
+
+
+
+## QUESTION 1
+
+<!-- Make sure at least one of your charts includes reference marks!! -->
+
+__Make a new column that represents the total number of babies with your name for only those states in which you have lived. (If you have only ever lived in one state, pick at least one other state so you get practice summing across columns). Make a graph displaying that total for your name over time.__
+
+When I was born in Utah in 2002, the popularity of the name Rebecca was on a downslope in Utah, Idaho, and Arizona in the year that I was born.
+
+```{python}
+# Q1
+rebecca_df = (
+    df.filter(pl.col("name") == "Rebecca")
+    .with_columns(
+        total_babies = pl.col("ID") + pl.col("AZ") + pl.col("UT")
+    )
+    .select(["year", "ID", "AZ", "UT", "total_babies"])
+    .sort("year")
+)
+
+plot = (
+    ggplot(rebecca_df, aes(x="year", y="total_babies"))
+    + geom_line(color="pink") 
+    + geom_vline(xintercept=2002, linetype="dotted", color="blue")
+    + geom_text(x=2002, y=450, label="My Birth Year", color="black")
+    + labs(
+        title="Total Popularity of the Name 'Rebecca'",
+        subtitle="Combined total for Idaho, Arizona, and Utah",
+        x="Year",
+        y="Total Number of Babies"
+    )
+    +scale_x_continuous(format="d")
+)
+
+plot.show()
+```
+
+
+## QUESTION 2
+
+1. __Let's look at a name that is special for members of the church: Brigham. For each year, calculate what proportion of babies named Brigham were born in Idaho and Utah? Make a graph displaying the proportion over time.__  
+
+
+
+```{python}
+# Q2
+Brigham_df = (
+    df.filter(pl.col("name") == "Brigham")
+    .with_columns(
+        total_babies = (pl.col("ID") + pl.col("UT"))/ pl.col('Total')
+    )
+    .select(["year", "ID", "UT", "total_babies"])
+    .sort("year")
+)
+
+plot = (
+    ggplot(Brigham_df, aes(x="year", y="total_babies"))
+    + geom_line(color="pink") 
+    + labs(
+        title="Total Popularity of the Name 'Brigham'",
+        subtitle="Combined total for Idaho, and Utah",
+        x="Year",
+        y="Total Number of Babies"
+    )
+    +scale_x_continuous(format="d")
+)
+
+plot.show()
+
+
+```
+
+<!-- Make sure at least one of your charts includes reference marks!! -->
+
+## QUESTION 3
+
+1. __Consider doing some data validation. For the name David, calculate a sum of all 50 states and District of Columbia for each year. Now compare that total to the value in the 'Total' column. In which years, if any, do they not agree?__
+
+The data is correct, there is no year where the sum of all babies named David does not match the total that is given.
+
+```{python}
+
+david_validation = (
+    df.filter(pl.col("name") == "David")
+    .with_columns(
+        Manual_State_Sum = pl.sum_horizontal(pl.exclude("name", "year", "Total"))
+    )
+    .with_columns(
+        is_match = pl.col("Manual_State_Sum") == pl.col("Total"),
+        difference = pl.col("Manual_State_Sum") - pl.col("Total")
+    )
+)
+disagreement_years = (
+    david_validation
+    .filter(pl.col("is_match") == False)
+    .select(["year", "Total", "Manual_State_Sum", "difference"])
+    .sort("year")
+)
+print(disagreement_years)
+```

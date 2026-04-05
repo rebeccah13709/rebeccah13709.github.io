@@ -1,7 +1,7 @@
 ---
-title: "Client Report - [Insert Project Title]"
-subtitle: "Course DS 250"
-author: "[STUDENT NAME]"
+title: "Client Report - Baseball Database"
+subtitle: "Unit 3 Task 1"
+author: "Rebecca Hockman"
 format:
   html:
     self-contained: true
@@ -25,4 +25,159 @@ execute:
     
 ---
 
-### Paste in a template
+```{python}
+import polars as pl
+import numpy as np
+import sqlite3
+from lets_plot import *
+
+LetsPlot.setup_html(isolated_frame=True)
+```
+
+
+```{python}
+# Learn morea about Code Cells: https://quarto.org/docs/reference/cells/cells-jupyter.html
+
+# Include and execute your code here
+sqlite_file = 'lahmansbaseballdb.sqlite'
+# this file must be in the same location as your .qmd or .py file
+con = sqlite3.connect(sqlite_file)
+```
+
+```{python}
+# Include and execute your code here
+
+# The code below uses some basic SQL code to read in the entire 'batting' table in the database and store it in a polars dataframe called 'results'. You must write polars code to manipulate the results dataframe to address the task.
+
+q = """
+    SELECT *
+    FROM batting
+    """
+results = pl.read_database(q, con, infer_schema_length=None) 
+# What does infer_schema_length = None do?
+results
+```
+
+## QUESTION 1
+
+__Use the provided code above to read in the batting table. Then, with Python Polars manipulate the 'results' dataframe to calculate the number of at bats and the batting average for each year a player played. Filter the data frame to only include players with at least 10 at bats that year. Sort the dataframe from highest batting average to lowest, and then by playerid alphabetically. Show the top 5 results in your report.__
+
+Note: A batting average is meant to measure how often a player puts the ball in play and gets to base safely. For this task, use a simplified version of batting average defined as the sum of hits (labeled 'H') divided by number of at bats (labeled 'AB').
+
+With this table, we can see that the top 5 averages are all over .5, but their years are widely spread, showing that there are no time factors in the increasing of batting averages of players.
+
+```{python}
+# Include and execute your code here
+q = """
+    SELECT *
+    FROM batting
+    """
+results = pl.read_database(q, con, infer_schema_length=None) 
+# What does infer_schema_length = None do?
+
+results_1 = (
+    results
+    .group_by(["playerID", "yearID"])
+    .agg(
+        AB = pl.col("AB").sum(),
+        H = pl.col("H").sum()
+    )
+    .with_columns(
+        batting_avg = pl.col("H") / pl.col("AB")
+    )
+    .filter(pl.col("AB") >= 10)
+    .sort(["batting_avg", "playerID"], descending=[True, False])
+    .select(["playerID", "yearID", "AB", "H", "batting_avg"])
+    .head(5)
+)
+
+results_1
+
+```
+
+
+## QUESTION 2
+
+__Use the provided code above to read in the batting table. Then, with Python Polars manipulate the 'results' dataframe to calculate the batting average for each player over their entire career (all years combined). Only include players with at least 100 at bats over their entire career. Sort the dataframe from highest batting average to lowest, and then by playerid alphabetically. Show the top 5 results in your report.__ 
+
+Note: A batting average is meant to measure how often a player puts the ball in play and gets to base safely. For this task, use a simplified version of batting average defined as the sum of hits (labeled 'H') divided by number of at bats (labeled 'AB').
+
+This table shows players with high batting averages across their career, so these are players who have a lot of data. This means that this is a more reliable set of data.
+
+```{python}
+# Include and execute your code here
+q = """
+    SELECT *
+    FROM batting
+    """
+results = pl.read_database(q, con, infer_schema_length=None) 
+# What does infer_schema_length = None do?
+
+results_2 = (
+    results
+    .group_by("playerID")
+    .agg(
+        career_AB = pl.col("AB").sum(),
+        career_H = pl.col("H").sum()
+    )
+    .with_columns(
+        batting_avg = pl.col("career_H") / pl.col("career_AB")
+    )
+    .filter(pl.col("career_AB") >= 100)
+    .sort(["batting_avg", "playerID"], descending=[True, False])
+    .with_columns(
+        pl.col("batting_avg").round(3)
+    )
+    .select(["playerID", "career_AB", "career_H", "batting_avg"])
+    .head(5)
+)
+
+results_2
+
+```
+
+Which manager had the best season, in terms of win percentage?
+
+```{python}
+
+con = sqlite3.connect(sqlite_file)
+
+q = """
+  SELECT PlayerID
+      , G as 'games'
+      , W as 'Wins'
+      , yearID
+      , (W* 1.0/G) as 'Win %'
+  FROM managers
+  WHERE games > 160
+  ORDER BY 'Win %' DESC, games DESC
+  """
+results = pl.read_database(q, con, infer_schema_length=None)
+results
+```
+
+Who has done the best over their entire career?
+
+```{python}
+
+q = """
+  SELECT PlayerID
+      , G as 'games'
+      , W as 'Wins'
+      , min(yearID)
+      , (W* 1.0/ sum(G)) as 'Win %'
+  FROM managers
+  --WHERE games > 160
+  GROUP BY playerID
+  HAVING games > 160 AND min(yearID) >1960
+  ORDER BY 'Win %' DESC, games DESC
+  """
+results = pl.read_database(q, con, infer_schema_length=None)
+results
+```
+
+
+
+
+
+

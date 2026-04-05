@@ -1,7 +1,7 @@
 ---
-title: "Client Report - [Insert Project Title]"
-subtitle: "Course DS 250"
-author: "[STUDENT NAME]"
+title: "Client Report - Baseball Database SQL Query"
+subtitle: "Unit 3 Task 2"
+author: "Rebecca Hockman"
 format:
   html:
     self-contained: true
@@ -25,4 +25,104 @@ execute:
     
 ---
 
-### Paste in a template
+
+```{python}
+import polars as pl
+import numpy as np
+import sqlite3
+from lets_plot import *
+
+LetsPlot.setup_html(isolated_frame=True)
+```
+
+
+```{python}
+# Learn morea about Code Cells: https://quarto.org/docs/reference/cells/cells-jupyter.html
+
+# Include and execute your code here
+sqlite_file = 'lahmansbaseballdb.sqlite'
+# this file must be in the same location as your .qmd or .py file
+con = sqlite3.connect(sqlite_file)
+```
+
+## QUESTION 1
+
+__Write an SQL query that provides playerID, yearID, and batting average for players with at least 1 at bat that year. Sort the table from highest batting average to lowest, and then by playerid alphabetically. Show the top 5 results in your report.__
+
+This shows the top 5 players' batting averages for the year if they batted at least once. the top five in this case have 1 for their average because they only batted once.
+
+```{python}
+# Include and execute your code here
+
+# The code below can serve as a template for all the rest of your queries. It is just missing the
+# SQL code. Put your SQL query in between the triple quotation marks to create the query. The records will be stored in 'results', which is a polars data frame
+
+q = """
+SELECT
+    playerID,
+    yearID,
+    CAST(SUM(H) AS FLOAT) / SUM(AB) AS batting_avg
+FROM batting
+WHERE AB >= 1
+GROUP BY playerID, yearID
+HAVING SUM(AB) >= 1
+ORDER BY batting_avg DESC, playerID ASC
+LIMIT 5;
+    """
+results = pl.read_database(q, con)
+results
+
+
+```
+
+
+## QUESTION 2
+
+__Use the same query as above, but only include players with at least 10 at bats that year. Print the top 5 results.__  
+
+These batting averages are going to be lower, because this is for players who batted at least 10 times that year.
+
+```{python}
+# Include and execute your code here
+
+q = """
+SELECT
+    playerID,
+    yearID,
+    CAST(SUM(H) AS FLOAT) / SUM(AB) AS batting_avg
+FROM batting
+GROUP BY playerID, yearID
+HAVING SUM(AB) >= 10
+ORDER BY batting_avg DESC, playerID ASC
+LIMIT 5;
+    """
+results = pl.read_database(q, con)
+results
+
+```
+
+
+## QUESTION 3
+
+__Now modify the SQL query to calculate the batting average for players over their entire careers (all years combined). Only include players with at least 100 at bats over their entire career, and print the top 5 results.__
+
+The top player listed here is Ty Cobb who has the highest batting average in MLB history, at 36.6%
+
+```{python}
+# Include and execute your code here
+q = """
+SELECT
+    playerID,
+    CAST(SUM(H) AS FLOAT) / SUM(AB) AS batting_avg,
+    SUM(AB) AS career_AB
+FROM batting
+GROUP BY playerID
+HAVING SUM(AB) >= 100
+ORDER BY batting_avg DESC, playerID ASC
+LIMIT 5
+"""
+
+results = pl.read_database(q, con)
+results
+
+```

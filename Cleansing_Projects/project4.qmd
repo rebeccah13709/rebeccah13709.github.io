@@ -1,7 +1,7 @@
 ---
-title: "Client Report - [Insert Project Title]"
-subtitle: "Course DS 250"
-author: "[STUDENT NAME]"
+title: "Longevity and Highest Paid Positions"
+subtitle: "Stretch 3"
+author: "Rebecca Hockman"
 format:
   html:
     self-contained: true
@@ -25,4 +25,154 @@ execute:
     
 ---
 
-### Paste in a template
+```{python}
+import polars as pl
+import numpy as np
+import sqlite3
+from lets_plot import *
+
+LetsPlot.setup_html(isolated_frame=True)
+```
+
+
+```{python}
+# Learn morea about Code Cells: https://quarto.org/docs/reference/cells/cells-jupyter.html
+
+# Include and execute your code here
+sqlite_file = 'lahmansbaseballdb.sqlite'
+# this file must be in the same location as your .qmd or .py file
+con = sqlite3.connect(sqlite_file)
+```
+
+
+
+Identify the top 10 players with the longest Major League Baseball careers. Include their:
+
+playerID
+first_name
+last_name
+career_length
+
+```{python}
+q_batting = """
+SELECT playerID, yearID
+FROM batting
+"""
+batting = pl.read_database(q_batting, con)
+
+q_names = """
+SELECT playerID, nameFirst, nameLast
+FROM people
+"""
+people = pl.read_database(q_names, con)
+
+career = (
+    batting
+    .group_by("playerID")
+    .agg(
+        first_year = pl.col("yearID").min(),
+        last_year = pl.col("yearID").max()
+    )
+    .with_columns(
+        career_length = pl.col("last_year") - pl.col("first_year") + 1
+    )
+)
+
+top10 = (
+    career
+    .join(people, on="playerID", how="left")
+    .select([
+        "playerID",
+        pl.col("nameFirst").alias("first_name"),
+        pl.col("nameLast").alias("last_name"),
+        "career_length"
+    ])
+    .sort("career_length", descending=True)
+    .head(10)
+)
+
+top10
+
+
+```
+
+
+
+Write an SQL query that pulls the tables you need into a polars dataframe. Then, use python polars to create a summary table showing the average salary for each position (e.g., pitcher, catcher, outfielder). Position information can be found in the fielding table in the POS column.
+Include the following columns:
+
+position
+average_salary
+total_players
+highest_salary
+The highest_salary column should display the highest salary ever earned by a player in that position.
+
+Additionally, add a new column to the summary table you just created to label the average salary:
+
+If the average salary is above $3 million, categorize it as “High Salary.”
+If the average salary is between $2 million and $3 million, categorize it as “Medium Salary.”
+Otherwise, categorize it as “Low Salary.”
+Order the table by average salary in descending order.
+
+Hint: Beware, it is common for a player to play multiple positions in a single year. For this analysis, each player’s salary should only be counted toward one position in a given year. You get to determine which position to count it towards.
+
+```{python}
+import polars as pl
+import sqlite3
+
+sqlite_file = "lahmansbaseballdb.sqlite"
+con = sqlite3.connect(sqlite_file)
+
+query = """
+SELECT
+    s.playerID,
+    s.yearID,
+    s.salary,
+    f.POS,
+    f.G
+FROM Salaries s
+JOIN Fielding f
+ON s.playerID = f.playerID AND s.yearID = f.yearID
+"""
+
+df = pl.read_database(query, con)
+
+
+
+df_positions = (
+    df.sort(by="G", descending=True)
+    .unique(subset=["playerID", "yearID"], keep="first")
+    .select([
+        pl.col("playerID"),
+        pl.col("yearID"),
+        pl.col("POS").alias("position"),
+        pl.col("salary")
+    ])
+)
+
+summary = (
+    df_positions
+    .group_by("position")
+    .agg([
+        pl.mean("salary").alias("average_salary"),
+        pl.n_unique("playerID").alias("total_players"),
+        pl.max("salary").alias("highest_salary")
+    ])
+)
+
+summary = summary.with_columns(
+    pl.when(pl.col("average_salary") > 3_000_000)
+    .then(pl.lit("High Salary"))
+    .when(pl.col("average_salary") >= 2_000_000)
+    .then(pl.lit("Medium Salary"))
+    .otherwise(pl.lit("Low Salary"))
+    .alias("salary_category")
+)
+
+mysummary = summary.sort("average_salary", descending=True)
+
+mysummary
+```
+
+
+This summary table shows that the 1st Baseman makes the most. To show which positions makes the most, for players that play multiple positions in a year, I decided to .sort() the number of games played in each position. After that I used pl/first to pull the first stat for each player. What this does is ensure that each player is shown only once, and counted based on the position that they played the most games for each year. 

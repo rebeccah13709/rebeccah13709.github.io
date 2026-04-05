@@ -1,6 +1,6 @@
 ---
-title: "Client Report - [Insert Project Title]"
-subtitle: "Course DS 250"
+title: "Client Report - What's in a Name?"
+subtitle: "Unit 1 Task 2"
 author: "[STUDENT NAME]"
 format:
   html:
@@ -25,4 +25,154 @@ execute:
     
 ---
 
-### Paste in a template
+```{python}
+import polars as pl
+import numpy as np
+from lets_plot import *
+
+LetsPlot.setup_html(isolated_frame=True)
+```
+
+```{python}
+# Learn morea about Code Cells: https://quarto.org/docs/reference/cells/cells-jupyter.html
+
+# Include and execute your code here
+df = pl.read_csv("https://posit.byui.edu/content/0d43d66f-d3b7-4c43-8c36-52e3ed69e7f1/names_year_csv.csv")
+```
+
+## QUESTION 1
+
+<!-- Make sure at least one of your charts includes reference marks!! -->
+
+__How does your name at your birth year compare to its use historically? Your must provide a chart. The years labels on your charts should not include a comma.__ 
+
+10,444 babies were named Rebecca in the year 2002, when the name began to be on a down slope.
+
+```{python}
+# Q1
+from lets_plot import *
+LetsPlot.setup_html(isolated_frame=True)
+
+me = "Rebecca"
+birthyear = 2002
+state_cols = df.columns[2:]
+
+Rebecca_df = (
+    df
+    .filter(pl.col("name") == me)
+    .with_columns(total_babies=pl.sum_horizontal(state_cols))
+    .select(["year", "total_babies"])
+    .sort("year")
+)
+
+x = [str(v) for v in Rebecca_df["year"].to_list()]
+y = Rebecca_df["total_babies"].to_list()
+birth_total = Rebecca_df.filter(pl.col("year") == birthyear)["total_babies"][0]
+
+plot = (
+    ggplot({'year': x, 'total': y})
+    + geom_line(aes(x='year', y='total'), color="blue", size=1)
+    + geom_point(aes(x=[str(birthyear)], y=[birth_total]), color="red", size=4)
+    + geom_text(
+        data={'year': [str(birthyear)], 'total': [birth_total], 'label': [f"{birthyear}: {birth_total}"]},
+        mapping=aes(x='year', y='total', label='label'),
+        color="red",
+        nudge_y=10
+    )
+    + ggtitle(f"In 2002, 10,444 babies were named Rebecca")
+    + xlab("Year")
+    + ylab("Number of Babies")
+)
+
+plot
+
+
+
+```
+
+
+## QUESTION 2
+
+__Think of a unique name from a famous movie. Plot the usage of that name and see how changes line up with the movie release. Does it look like the movie had an effect on usage?__  
+
+The classic name Rosalie became popular immediately after the movie Twilight came out in 2008.
+
+```{python}
+# Q2
+
+name_movie = "Rosalie"
+movie_year = 2008
+state_cols = df.columns[2:]
+
+Coralie_df = (
+    df
+    .filter(pl.col("name") == name_movie)
+    .with_columns(total_babies=pl.sum_horizontal(state_cols))
+    .select(["year", "total_babies"])
+    .sort("year")
+)
+
+x = [str(v) for v in Coralie_df["year"].to_list()]
+y = Coralie_df["total_babies"].to_list()
+movie_total = Coralie_df.filter(pl.col("year") == movie_year)["total_babies"]
+movie_total = int(movie_total[0]) if len(movie_total) > 0 else 0  
+
+plot = (
+    ggplot({'year': x, 'total': y})
+    + geom_line(aes(x='year', y='total'), color="purple", size=1)
+    + geom_point(aes(x=[str(movie_year)], y=[movie_total]), color="red", size=4)
+    + geom_text(
+        data={'year': [str(movie_year)], 'total': [movie_total], 'label': [f"{movie_year}: {movie_total}"]},
+        mapping=aes(x='year', y='total', label='label'),
+        color="red",
+        nudge_y=25
+    )
+    + ggtitle(f"Babies named Rosalie compared to the movie Twilight (2008)")
+    + xlab("Year")
+    + ylab("Number of Babies")
+)
+
+plot
+
+
+
+```
+
+## QUESTION 3
+
+__Mary, Martha, Peter, and Paul are all Christian names. From 1920 - 2000, compare the name usage of each of the four names in a single chart. What trends do you notice?__  
+
+Mary used to be a very poplular Christian name, until each name evened out in 1969
+
+```{python}
+# Q3
+
+names = ["Mary", "Martha", "Peter", "Paul"]
+years_range = (1920, 2000)
+state_cols = df.columns[2:]
+
+names_df = (
+    df
+    .filter(pl.col("name").is_in(names) & pl.col("year").is_between(years_range[0], years_range[1]))
+    .with_columns(total_babies=pl.sum_horizontal(state_cols))
+    .select(["year", "name", "total_babies"])
+    .sort(["name", "year"])
+)
+plot_data = {
+    "year": [str(v) for v in names_df["year"].to_list()],
+    "total": names_df["total_babies"].to_list(),
+    "name": names_df["name"].to_list()
+}
+plot = (
+    ggplot(plot_data)
+    + geom_line(aes(x='year', y='total', color='name'), size=1)
+    + ggtitle("Popularity of biblical names over time (1920–2000)")
+    + xlab("Year")
+    + ylab("Number of Babies")
+)
+
+plot
+
+
+```
+<!-- Make sure at least one of your charts includes reference marks!! -->

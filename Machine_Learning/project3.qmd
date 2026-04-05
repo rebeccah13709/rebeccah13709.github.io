@@ -1,7 +1,7 @@
 ---
-title: "Client Report - [Insert Project Title]"
-subtitle: "Course DS 250"
-author: "[STUDENT NAME]"
+title: "Client Report - Show me!"
+subtitle: "Unit 4 Task 3"
+author: "Rebecca Hockman"
 format:
   html:
     self-contained: true
@@ -25,4 +25,150 @@ execute:
     
 ---
 
-### Paste in a template
+```{python}
+import polars as pl
+import numpy as np
+from lets_plot import *
+from sklearn.model_selection import train_test_split
+from sklearn.inspection import permutation_importance
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.linear_model import LogisticRegression
+from sklearn import metrics
+import requests
+import io
+# add the additional libraries you need to import for ML here
+
+LetsPlot.setup_html(isolated_frame=True)
+```
+
+
+```{python}
+# import your data here using polars and the URL
+url = "https://raw.githubusercontent.com/byuidatascience/data4dwellings/master/data-raw/dwellings_ml/dwellings_ml.csv"
+
+response = requests.get(url)
+
+df = pl.read_csv(io.BytesIO(response.content))
+
+
+# the OG
+y = df.select("before1980")
+X = df.drop(["before1980", "yrbuilt", "parcel"])
+from sklearn.model_selection import train_test_split
+X_np = X.to_numpy()
+y_np = y.to_numpy().ravel()
+X_train, X_test, y_train, y_test = train_test_split(
+    X_np,
+    y_np,
+    test_size=0.2,
+    random_state=42
+)
+from sklearn.ensemble import RandomForestClassifier
+model = RandomForestClassifier(
+    n_estimators=200,
+    random_state=42
+)
+model.fit(X_train, y_train)
+from sklearn.metrics import accuracy_score
+y_pred = model.predict(X_test)
+
+```
+
+## QUESTION 1
+
+1. __Repeat the classification exercise using 2 different algorithms/models. Explain the differences between the 3 models__ (your original one, and the 2 new ones for this task).
+
+The first new model I used is the decision tree. This is similar to the random forest but it is one tree rather than many, which is easy to interperet but over fits the data, so it can be less reliable.
+
+The second new model I used is the logistic regression model. This gave me two different accuracies. The decision tree accuracy, which is the actual accuracy score, and the logistic regression accuracy which shows the accuracy of the linear probability of the data relationship. The logistical regression shows the linear relationships between the features and the year.
+
+```{python}
+# Include and execute your code here
+
+
+dt_model = DecisionTreeClassifier(random_state=42)
+dt_model.fit(X_train, y_train)
+
+y_pred_dt = dt_model.predict(X_test)
+accuracy_dt = accuracy_score(y_test, y_pred_dt)
+print("Decision Tree Accuracy:", accuracy_dt)
+
+log_model = LogisticRegression(max_iter=1000, random_state=42)
+log_model.fit(X_train, y_train)
+
+y_pred_log = log_model.predict(X_test)
+accuracy_log = accuracy_score(y_test, y_pred_log)
+print("Logistic Regression Accuracy:", accuracy_log)
+
+```
+
+
+## QUESTION 2
+
+1. For each model (your original one, and the 2 new ones for this task), display the classification report and the permutation importances for the most important features.  Discuss which model you would recommend to the Client and why.
+
+I would recomend the Random Forest Classifier to a client because it combines many different decision trees to show the relationships between the different factors to the goal. In this case, it helps us identify the probability of a house being built before 1980 based on the different qualifiers.
+
+This has the best accuracy because it runs the several different possibilities and gives us the most likely statistics.
+
+```{python}
+# Include and execute your code here
+# The OG
+rf_model = RandomForestClassifier(n_estimators=200, random_state=42)
+rf_model.fit(X_train, y_train)
+y_pred_rf = rf_model.predict(X_test)
+print("=== Random Forest Classification Report ===")
+print(classification_report(y_test, y_pred_rf))
+
+# Decision Tree
+dt_model = DecisionTreeClassifier(random_state=42)
+dt_model.fit(X_train, y_train)
+y_pred_dt = dt_model.predict(X_test)
+print("=== Decision Tree Classification Report ===")
+print(classification_report(y_test, y_pred_dt))
+
+# Logistic Regression
+log_model = LogisticRegression(max_iter=1000, random_state=42)
+log_model.fit(X_train, y_train)
+y_pred_log = log_model.predict(X_test)
+print("=== Logistic Regression Classification Report ===")
+print(classification_report(y_test, y_pred_log))
+
+```
+
+```{python}
+
+def perm_importance_table(model, X_test, y_test, feature_names, top_n=5):
+    results = permutation_importance(model, X_test, y_test, n_repeats=10, random_state=17)
+    df_imp = pl.DataFrame({
+        "feature": feature_names,
+        "perm_imp": results.importances_mean
+    }).sort("perm_imp", descending=True)
+    return df_imp.head(top_n)
+```
+
+
+```{python}
+# The OG
+rf_top = perm_importance_table(rf_model, X_test, y_test, X.columns)
+print("Random Forest Top Features:")
+print(rf_top)
+```
+
+
+```{python}
+# Decision Tree 
+dt_top = perm_importance_table(dt_model, X_test, y_test, X.columns)
+print("Decision Tree Top Features:")
+print(dt_top)
+```
+
+
+```{python}
+# Logistic Regression 
+log_top = perm_importance_table(log_model, X_test, y_test, X.columns)
+print("Logistic Regression Top Features:")
+print(log_top)
+```

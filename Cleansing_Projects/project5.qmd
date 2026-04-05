@@ -1,7 +1,7 @@
 ---
-title: "Client Report - [Insert Project Title]"
-subtitle: "Course DS 250"
-author: "[STUDENT NAME]"
+title: "Client Report - Star Wars for Dummies"
+subtitle: "Unit 5 Task 3"
+author: "Rebecca Hockman"
 format:
   html:
     self-contained: true
@@ -25,4 +25,209 @@ execute:
     
 ---
 
-### Paste in a template
+```{python}
+import polars as pl 
+import numpy as np
+from lets_plot import *
+import polars.selectors as cs
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+# add the additional libraries you need to import for ML here
+
+LetsPlot.setup_html(isolated_frame=True)
+```
+
+
+```{python}
+# import your data here using polars and the URL
+sw = pl.read_csv('StarWars_with_emails.csv', skip_rows= 10)
+
+```
+
+
+
+<!-- Rather than a simple write up like we have been doing so far, this project requires a more structured approach. You will need to show you have completed the tasks, but will structure the report in a way that is more like a client report. The report will be structured as follows:
+
+ - Executive Summary: This is a high level overview of the analysis, including the problem statement, the data used, and the main findings. It should be concise and to the point, summarizing the key insights/recommendations without going into too much detail. These are usually bullet points, no graphs. PLEASE EXPLICITLY STATE IN THIS SECTION WHETHER YOU DID THE STRETCH OR NOT! 
+ - Methods: this is a high level overview of the methods used in the analysis. This should include an explanation of data preparation steps, especially how you dealt with each categorical variable and why. Showing the resulting or original distribution of variables may be helpful. Describe how you handled missing values and outliers. How did/might your decisions impact results?Explain any feature engineering steps you took. This is also where you will put the graphs you recreated to show you validated the dataset and that it matches the article.
+ - Results: this is a more in-depth explanation of results. A classification report and feature importance graphs belong here.
+ - Conclusion: this is where you will discuss the implication of the results, including any limitations of the analysis, and recommendations for actions/future work. It may feel repetitive to the executive summary, but it should be more detailed and include any additional insights you gained from the analysis. -->
+
+## Executive Summary
+
+_type your write-up and analysis here_
+
+
+
+## Methods
+
+_type your report here, you will likely want multiple code chunks and text intermingled_
+
+```{python}
+# task 1
+
+sw_new = sw.with_columns(
+    first_part = pl.col("email").str.extract(r"^([^@]+)"),  
+    email_domain = pl.col("email").str.extract(r"@(.+)$").str.to_lowercase().str.strip_chars()   
+).with_columns(
+    first_name = pl.col("first_part").str.extract(r"^([a-zA-Z]+)"),
+    last_name  = pl.col("first_part").str.extract(r"([a-zA-Z]+)$")
+).select([
+    "email", "first_name", "last_name", "email_domain"
+])
+
+display(sw_new)
+
+```
+
+```{python}
+sw_new1 = sw_new.with_columns(
+    email_domain = pl.col("email").str.extract(r"@(.+)$").str.to_lowercase()
+)
+display(sw_new.group_by("email_domain").agg(pl.len()))
+```
+
+```{python}
+# filtering for task 2
+episode_cols = [
+    "seen_episode_I", 
+    "seen_episode_II", 
+    "seen_episode_III", 
+    "seen_episode_IV", 
+    "seen_episode_V", 
+    "seen_episode_VI"
+]
+sw_filtered = sw.filter(
+    pl.any_horizontal([pl.col(col).is_not_null() for col in episode_cols])
+)
+display(sw_filtered.head(5))
+print(f"Number of respondents who have seen at least one film: {sw_filtered.height}")
+```
+
+```{python}
+#task 2A
+sw_filtered.group_by('age').agg(pl.len())
+
+age_dict = {
+  '18-29': 18,
+  '30-44': 30,
+  '45-60': 45,
+  '> 60': 60
+}
+sw_ages = sw_filtered.with_columns(pl.col('age').replace_strict(age_dict), cs.by_index())
+```
+
+```{python}
+#task 2B
+edu_dict = {
+  'Less than high school degree': 9,
+  'High school degree': 12,
+  'Some college or Associate degree': 14,
+  'Bachelor degree': 16,
+  'Graduate degree':19
+}
+sw_edu = sw_ages.with_columns(pl.col('education').replace_strict(edu_dict), cs.by_index()
+)
+```
+
+```{python}
+#task 2C
+income = sw_edu.with_columns(
+    (pl.col('household_income').str.extract(r'\$(\d+)').cast(pl.Int64)* 1000).alias('Income'))
+income = income.drop('household_income')
+
+#display(income)
+
+```
+
+```{python}
+#task 2D
+
+favor_dict = {
+    "Unfamiliar (N/A)": 0,
+    "Neither favorably nor unfavorably (neutral)": 0,
+    "Somewhat unfavorably": -1,
+    "Somewhat favorably": 1,
+    "Very unfavorably": -2,
+    "Very favorably": 2
+}
+
+characters = [
+    'han_solo',
+    'luke_skywalker',
+    'princess_leia_organa',
+    'anakin_skywalker',
+    'obi_wan_kenobi',
+    'emperor_palpatine',
+    'darth_vader',
+    'lando_calrissian',
+    'boba_fett',
+    'C_3PO',
+    'R2_D2',
+    'jar_jar_binks',
+    'padme_amidala',
+    'yoda'
+]
+
+sw_rated = income.with_columns(
+    [pl.col(c).fill_null(0).replace(favor_dict).cast(pl.Int64).alias(c) for c in characters]
+)
+
+#display(sw_rated)
+```
+
+```{python}
+#task 3
+sw_cleaned = sw_rated.drop('RespondentID').drop('email')
+
+sw_cleaned = sw_cleaned.with_columns(
+    (pl.col('Income') >= 50_000).cast(pl.Int8).alias('high_income')
+)
+
+categorical_cols = [c for c, dtype in zip(sw_cleaned.columns, sw_cleaned.dtypes) if dtype == pl.Utf8]
+sw_encoded = sw_cleaned.to_dummies(columns=categorical_cols)
+
+sw_model = sw_encoded.drop('seen_episode_I_null').drop('seen_episode_II_null').drop('seen_episode_III_null').drop('seen_episode_IV_null').drop('seen_episode_V_null').drop('seen_episode_VI_null').drop('who_shot_first_null').drop('know_expanded_universe_null').drop('expanded_universe_fan_null').drop('star_trek_fan_null').drop('gender_null').drop('location_null')
+
+display(sw_model)
+```
+
+
+```{python}
+
+#Machine Learning
+y = sw_model['high_income'].fill_null(0)
+X = sw_model.drop(['Income', 'high_income'])
+
+X_np = X.to_numpy()
+y_np = y.to_numpy().ravel()
+X_train, X_test, y_train, y_test = train_test_split(
+    X_np,
+    y_np,
+    test_size=0.3,
+    random_state=42
+)
+
+model = RandomForestClassifier(
+    n_estimators=200,
+    random_state=42
+)
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+#print("Accuracy:", accuracy)
+```
+
+## Results
+
+_type your report here, you will likely want multiple code chunks and text intermingled_
+
+
+For the Machine Learning Model, I used the random Forest model. I used this one because it allows me to create the possibilities from the each possible branch of data. In this case we got an accuracy of 56.88% on determining if someone makes 50K or more based on their information. 
+
+```{python}
+# Include and execute your code here
+print("Accuracy:", accuracy)
+```
+

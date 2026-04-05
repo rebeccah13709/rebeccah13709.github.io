@@ -8,8 +8,6 @@ Business analytics major with a proven track record of driving operational effic
 <div id="webaddress">
 <a href="www.linkedin.com/in/rebeccahockman">Linkedin</a>
 | <a href="rhockman@melaleuca.com">Email</a>
-<!-- | <a href="https://yourusername.github.io/datascience_portfolio/gh-pages/resume.pdf">Download PDF</a> -->
-| <a href="https://github.com/byuidatascience/datascience_portfolio/blob/gh-pages/resume.pdf">Download PDF</a>
 </div>
 
 

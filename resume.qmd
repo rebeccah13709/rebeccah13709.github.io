@@ -3,7 +3,10 @@ layout: cv
 title: Rebecca Hockman's CV
 ---
 # Rebecca Hockman
-Business analytics major with a proven track record of driving operational efficiency and performance improvement in customer service and internal solutions environments. Currently serving as CC solutions Team team lead, known for leveraging data-driven strategies to enhance team productivity, develop training protocols, and support cross-functional collaboration
+Business Analytics graduate and Sales Tax Accountant skilled in tax compliance, process improvement, data analysis, and
+cross-functional collaboration, with experience driving operational efficiency and supporting multi-jurisdictional
+reporting requirements
+
 
 <div id="webaddress">
 <a href="www.linkedin.com/in/rebeccahockman">Linkedin</a>
@@ -13,34 +16,50 @@ Business analytics major with a proven track record of driving operational effic
 
 ## Experience
 
+### Accounting Specialist - Tax
+May 2026 - Present
+Idaho Falls, ID
+
+Prepare and file sales and use tax returns across 45+ U.S. states and multiple Canadian provinces, ensuring timely
+compliance with diverse indirect tax regulations
+
+Organize exemption certificate processes, including Native American tax exemptions and distribution center use tax exemptions, while monitoring jurisdictional tax rate changes
+
+Reconcile Vertex tax reports to state and provincial tax returns, researching variances and validating tax
+calculations to support accurate reporting and remittance
+
 ### CC Solutions Team Lead
-January 2024 - Present
+January 2024 - May 2026
 Rexburg, Idaho
 
-Delivered rapid and effective internal solutions for customer service inquiries, consistently maintaining a scorecard rating of 80+ across all performance categories
-Recognized as star performer and top of Team scorecard for July 2025
-Averaged 16 tasks per hour over last 4 months versus the goal of 12, demonstrating sustained productivity and time management in a high volume environment
-Trained 2 new employees while providing ongoing coaching and feedback to whole team to elevate service standards
-Authored and refined Standard Operating Procedures and created a task tracker on excel to give feedback on efficiency in real time
-Acquired focused understanding of the compensation plan, policies, and connection with Marketing executives, tested and passed panel with Business Development on 8/21/2025
+Acquired comprehensive knowledge of compensation plans, company policies, and Marketing Executive
+relations, successfully completing and passing a Business Development panel assessment on 8/21/2025
+
+Averaged 16 tasks per hour against a goal of 12 in a high-volume environment while developing SOPs and an
+Excel-based task-tracking system to improve operational efficiency, enhanced performance visibility, and
+facilitated consistent 80+ scorecard ratings through effective customer service
+
 
 ### Customer Service Team Lead
 July 2024 - January 2025
 Rexburg, Idaho
 
-Delivered prompt, tailored solutions to customer inquiries, optimizing satisfaction, and growing members globally to maintain and improve on the company wide 97% retention rate
-Achieved top performer on new employee scorecard, reflecting excellence in service quality, responsiveness and adherence to Key Performance indicators
-Utilized resources such as the customer improvement message board and policy updates to tailor communication to each customer and recognize solutions to trends
-Sustained a minimum of 18 marketing service transfers per month
+Delivered prompt, tailored solutions to customer inquiries, optimizing satisfaction, and growing members
+globally to maintain and improve on the company-wide 97% retention rate
+
+Attained status as top performer on new employee scorecard and sustaining a minimum of 18 marketing service
+transfers per month
+
 
 ### 1st Assistant General Manager
 January 2020 - February 2024
 Glendale, Arizona
 
-Communicated with customers to manage and respond to negative customer reviews, implementing feedback and maintaining a 100% customer satisfaction score
-Reduced weekday labor costs from 15% to a consistent 8%, leveraging real-time scheduling adjustments and task-based labor modeling to optimize workforce efficiency
-Conducted structured interviews and performance evaluations to identify high-potential employees for promotion and wage increases, aligning development with operational goals
-Led training and development for new hires and prospective management candidates, including full onboarding and performance coaching for the January 2024 management team
+Reduced weekday labor costs from 15% to a consistent 8%, leveraging real-time scheduling adjustments and
+task-based labor modeling to optimize workforce efficiency
+
+Communicated with customers to manage and respond to negative customer reviews, implementing feedback and
+maintaining a 100% customer satisfaction score
 
 
 ## Skills
